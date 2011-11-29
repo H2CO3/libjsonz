@@ -1,0 +1,54 @@
+Overview
+-----------
+libjsonz is a lightweight JSON-parsing library written in C. It is not strict,
+so, as a result, you have to pass it valid JSON data, or unspecified behaviour may occur.
+
+Synopsys:
+------------
+
+#include <jsonz.h>
+
+enum jsonz_type_t:
+	jsonz_type_null:	a null value.
+	jsonz_type_number:	an integer or floating-point number.
+	jsonz_type_bool:	true or false.
+	jsonz_type_string:	string.
+	jsonz_type_array:	array of any JSON value.
+	jsonz_type_object:	object as strings with keys and any JSON type as values.
+
+strunct jsonz_result_t:
+	A private datatype. Result of parsing a valid JSON string. Must be accessed only through
+	the jsonz_* function API.
+
+jsonz_result_t *jsonz_parse(char *json, int len);
+	Parses a valid JSON string and returns the result as a jsons_result_t object.
+	This object must be freed after use using jsonz_result_free.
+	Internally, this structure is an array of positions, lengths and types, each
+	corresponding to a node in the top-level dictionary or array of the JSON string.
+	These offset and type values can be used to retrieve the original values of the
+	unstructured JSON string, and if a type is either of "array" or "object", it
+	can be recursively parsed using subsequent calls to this function.
+	len is the maximum length of the JSON string to be used. Pass -1 to use strlen(json).
+	This parameter is useful for the recursive parsing mentioned above.
+
+void jsonz_result_free(jsonz_result_t *result);
+	Should be called on every return value of jsonz_parse() when it's not anymore needed.
+
+jsonz_type_t jsonz_result_get_root_type(jsonz_result_t *result);
+	Returns either jsonz_type_array or jsonz_type_object according to the type of the
+	root node of the parsed JSON string.
+	
+int jsonz_result_get_position(jsonz_result_t *result, int idx);
+int jsonz_result_get_length(jsonz_result_t *result, int idx);
+jsonz_type_t jsonz_result_get_type(jsonz_result_t *result, int idx);
+	You can access the offset, length or data type of each parsed (top-level)
+	JSON node, respectively. Valid range of index is of course 0...jsonz_result_get_count().
+
+int jsonz_result_get_count(jsonz_result_t *result);
+	Returns the number of items parsed from the JSON string.
+
+Sample code:
+--------------
+
+See jsonzprettify.c about how to use the library.
+
