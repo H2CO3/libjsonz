@@ -9,6 +9,8 @@
 #include <jsonz.h>
 
 
+void recursive_dump(char *json, int length, int padding_n, int needs_separator, int recursion_level);
+
 /* 16 * 4 spaces */
 static char *padding_s = "                                                                ";
 
@@ -37,21 +39,24 @@ void recursive_dump(char *json, int length, int padding_n, int needs_separator, 
 		jsonz_type_t type = jsonz_result_get_type(buf, i);
 		char comma = i < jsonz_result_get_count(buf) - 1 ? ',' : '\0';
 		switch (type) {
-			case jsonz_type_null:
+			case jsonz_type_null: {
 				printf("%snull%c\n", root == jsonz_type_object && (i % 2) ? "" : padding_str - 4, comma);
 				break;
+			}
 			case jsonz_type_bool: {
 				char b[6];
 				strncpy(b, json + pos, len);
 				b[len] = 0;
 				printf("%s%s%c\n", root == jsonz_type_object && (i % 2) ? "" : padding_str - 4, b, comma);
-				break; }
+				break;
+			}
 			case jsonz_type_number: {
 				char ns[24];
 				strncpy(ns, json + pos, len);
 				ns[len] = 0;
 				printf("%s%s%c\n", root == jsonz_type_object && (i % 2) ? "" : padding_str - 4, ns, comma);
-				break; }
+				break;
+			}
 			case jsonz_type_string: {
 				char s[100];
 				strncpy(s, json + pos, len);
@@ -71,22 +76,27 @@ void recursive_dump(char *json, int length, int padding_n, int needs_separator, 
 						break;
 					default: break;
 				}
-				break; }
-			case jsonz_type_array:
+				break;
+			}
+			case jsonz_type_array: {
 				if (root == jsonz_type_array) {
 					/* printf("    "); */
 					printf("%s", padding_str - 4);
 				}
 				recursive_dump(json + pos, len, padding_n + 1, comma == ',', recursion_level + 1);
 				break;
-			case jsonz_type_object:
+			}
+			case jsonz_type_object: {
 				if (root == jsonz_type_array) {
 					/* printf("    "); */
 					printf("%s", padding_str - 4);
 				}
 				recursive_dump(json + pos, len, padding_n + 1, comma == ',', recursion_level + 1);
 				break;
-			default: break;
+			}
+			default: {
+				break;
+			}
 		}
 	}
 	if (buf) {
