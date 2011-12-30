@@ -16,7 +16,11 @@ enum jsonz_type_t:
 	jsonz_type_array:	array of any JSON value.
 	jsonz_type_object:	object as strings with keys and any JSON type as values.
 
-strunct jsonz_result_t:
+The jsonz_result API:
+*********************
+	This API contains quicker, lighter functions for memory-efficient and quick parsing of large chunks of JSON.
+
+struct jsonz_result_t:
 	A private datatype. Result of parsing a valid JSON string. Must be accessed only through
 	the jsonz_* function API.
 
@@ -47,8 +51,9 @@ jsonz_type_t jsonz_result_get_type(jsonz_result_t *result, int idx);
 int jsonz_result_get_count(jsonz_result_t *result);
 	Returns the number of items parsed from the JSON string.
 
-Sample code:
---------------
-
-See jsonzprettify.c about how to use the library.
-
+The jsonz_object API:
+*********************
+	This is an object-oriented API in order to conveniently (and automatically, recursively) parse relatively small amounts of JSON.
+	Please see the jsonz-object.h header file to see the functions. The functions have self-explanatory names; the object and the string returned by jsonz_object_parse and jsonz_object_build, must be jsonz_object_release()'d and free()'d.
+	The jsonz_object_array_add_element function accepts negative array indexes. This means it will append any object to the end of the array.
+	jsonz_object_array_add_element and jsonz_object_object_set_element jsonz_object_retain() the child object to be added, so it must be jsonz_object_release()'d. jsonz_object_object_set_element also copies its "key" parameter so it must be free()'d as well.

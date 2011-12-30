@@ -1,34 +1,32 @@
-TARGET = libjsonz.so
-OBJECTS = jsonz.o jsonz-internal.o
-HEADERS = jsonz.h
+TARGET = libjsonz.dylib
+OBJECTS = jsonz.o jsonz-internal.o jsonz-object.o
+HEADERS = jsonz
 
 CC = gcc
 LD = $(CC)
 
-CFLAGS = -Wall -std=gnu99 -fPIC -I. -c
+CFLAGS = -isysroot /User/sysroot -Wall -std=gnu99 -I. -c
 
-LDFLAGS = -fPIC -shared
+LDFLAGS = -isysroot /User/sysroot -w -dynamiclib -install_name /usr/lib/$(TARGET)
 
 
 all: $(TARGET)
 
-prettify: install
-	gcc -Wall -std=gnu99 -o jsonzprettify jsonzprettify.c -ljsonz
-
 $(TARGET): $(OBJECTS)
-	$(LD) $(LDFLAGS) -o libjsonz.so jsonz.o jsonz-internal.o
+	$(LD) $(LDFLAGS) -o $@ $^
 
 install: $(TARGET)
-	cp $(TARGET) /usr/lib
+	cp $^ /usr/lib
+	cp $^ /User/sysroot/usr/lib
 	cp -r $(HEADERS) /usr/include
+	cp -r $(HEADERS) /User/sysroot/usr/include
 
 clean:
-	rm -f $(OBJECTS) $(TARGET) jsonzprettify
+	rm -f $(OBJECTS) $(TARGET)
 
 uninstall:
 	rm /usr/lib/$(TARGET)
-	rm /usr/include/$(HEADERS)
+	rm /usr/include/$(HEADERS)/*
 
 %.o: %.c
-	$(CC) $(CFLAGS) -o $@ $^
-
+	$(CC) $(CFLAGS) $^

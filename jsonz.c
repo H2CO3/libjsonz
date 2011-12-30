@@ -6,8 +6,96 @@
   Licensed under a CreativeCommons Attribution 3.0 Unported License
 */
 
-#include <jsonz.h>
-#include <jsonz-internal.h>
+#include <jsonz/jsonz.h>
+#include <jsonz/jsonz-internal.h>
+
+
+void *jsonz_object_parse(char *json) {
+	void *obj = jsonz_object_recursive_parse(json, -1);
+	return obj;
+}
+
+char *jsonz_object_build(void *obj) {
+	jsonz_type_t root_type = jsonz_object_get_type(obj);
+	int length = 0;
+	char *result = malloc(1);
+	result[0] = '\0';
+	char *buf = NULL;
+	
+	if (root_type == jsonz_type_array) {
+		length = jsonz_object_array_length(obj);
+		buf = jsonz_string_concat(result, "[", NULL);
+		free(result);
+		result = buf;
+	} else if (root_type == jsonz_type_object) {
+		length = jsonz_object_object_length(obj);
+		buf = jsonz_string_concat(result, "{", NULL);
+		free(result);
+		result = buf;
+	}
+	
+	for (int i = 0; i < length; i++) {
+		if (i) {
+			/* no separator before the first child */
+			buf = jsonz_string_concat(result, ", ", NULL);
+			free(result);
+			result = buf;
+		}
+		
+		void *child = NULL;
+		char *key = NULL;
+		char *appendee = NULL;
+		if (root_type == jsonz_type_array) {
+			child = jsonz_object_array_nth_element(obj, i);
+		} else if (root_type == jsonz_type_object) {
+			key = jsonz_object_object_nth_key(obj, i);
+			child = jsonz_object_object_get_element(obj, key);
+		}
+		
+		jsonz_type_t type = jsonz_object_get_type(child);
+		if (type == jsonz_type_null) {
+			appendee = strdup("null");
+		} else if (type == jsonz_type_bool) {
+			char *app_tmp = jsonz_object_number_get_bool_value(child) ? "true" : "false";
+			appendee = strdup(app_tmp);
+		} else if (type == jsonz_type_number) {
+			appendee = malloc(48);
+			memset(appendee, 0, 48);
+			double val = jsonz_object_number_get_num_value(child);
+			sprintf(appendee, "%24.16lf", val);
+		} else if (type == jsonz_type_string) {
+			char *str_tmp = jsonz_object_string_get_str(child);
+			appendee = jsonz_string_concat("\"", str_tmp, "\"", NULL);
+		} else if (type == jsonz_type_array) {
+			appendee = jsonz_object_build(child);
+		} else if (type == jsonz_type_object) {
+			appendee = jsonz_object_build(child);
+		}
+		
+		if (root_type == jsonz_type_array) {
+			buf = jsonz_string_concat(result, appendee, NULL);
+			free(result);
+			result = buf;
+		} else if (root_type == jsonz_type_object) {
+			buf = jsonz_string_concat(result, "\"", key, "\"", ": ", appendee, NULL);
+			free(result);
+			result = buf;
+		}
+		free(appendee);
+	}
+	
+	if (root_type == jsonz_type_array) {
+		buf = jsonz_string_concat(result, "]", NULL);
+		free(result);
+		result = buf;
+	} else if (root_type == jsonz_type_object) {
+		buf = jsonz_string_concat(result, "}", NULL);
+		free(result);
+		result = buf;
+	}
+	
+	return result;
+}
 
 
 void jsonz_result_free(jsonz_result_t *result) {
