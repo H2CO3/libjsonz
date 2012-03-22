@@ -239,6 +239,10 @@ void jsonz_object_array_delete_nth_element(jsonz_object_array_t *arr, int index)
 	if (index >= arr->length || index < 0) {
 		return;
 	}
+
+	/* release the deletee */
+	jsonz_object_release(arr->children[index]);
+
 	/* shift the elements with their index >= index to the left */
 	for (int i = index; i < arr->length - 1; i++) {
 		arr->children[i] = arr->children[i + 1];
