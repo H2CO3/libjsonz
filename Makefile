@@ -5,7 +5,7 @@ HEADERS = jsonz
 CC = gcc
 LD = $(CC)
 
-CFLAGS = -isysroot /User/sysroot -Wall -std=gnu99 -I. -c
+CFLAGS = -isysroot /User/sysroot -Wall -I. -c
 
 LDFLAGS = -isysroot /User/sysroot -w -dynamiclib -install_name /usr/lib/$(TARGET)
 

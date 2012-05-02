@@ -5,7 +5,7 @@ HEADERS = jsonz
 CC = gcc
 LD = $(CC)
 
-CFLAGS = -Wall -std=gnu99 -fPIC -I. -c
+CFLAGS = -Wall -fPIC -I. -c
 
 LDFLAGS = -fPIC -shared
 

@@ -1,10 +1,10 @@
-/*
-  jsonz/jsonz.h
-  libjsonz
-  
-  Created by Árpád Goretity on 28/11/2011.
-  Licensed under a CreativeCommons Attribution 3.0 Unported License
-*/
+/**
+ * jsonz/jsonz.h
+ * libjsonz
+ *
+ * Created by Árpád Goretity on 28/11/2011.
+ * Licensed under a CreativeCommons Attribution 3.0 Unported License
+**/
 
 
 #ifndef __JSONZ_JSONZ_H__
@@ -28,10 +28,10 @@ typedef struct {
 	jsonz_type_t *types;
 } jsonz_result_t;
 
-void *jsonz_object_parse(char *json);
+void *jsonz_object_parse(const char *json);
 char *jsonz_object_build(void *obj);
 
-jsonz_result_t *jsonz_parse(char *json, int len);
+jsonz_result_t *jsonz_parse(const char *json, int len);
 void jsonz_result_free(jsonz_result_t *result);
 jsonz_type_t jsonz_result_get_root_type(jsonz_result_t *result);
 int jsonz_result_get_position(jsonz_result_t *result, int idx);
@@ -41,4 +41,3 @@ int jsonz_result_get_count(jsonz_result_t *result);
 
 
 #endif /* !__JSONZ_JSONZ_H__ */
-
