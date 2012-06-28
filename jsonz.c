@@ -4,7 +4,7 @@
  *
  * Created by Árpád Goretity on 28/11/2011.
  * Licensed under a CreativeCommons Attribution 3.0 Unported License
-**/
+ */
 
 #include <jsonz/jsonz.h>
 #include <jsonz/jsonz-internal.h>
@@ -42,12 +42,12 @@ char *jsonz_object_build(void *obj)
 
 	for (i = 0; i < length; i++)
 	{
-		if (i)
+		if (i > 0)
 		{
 			/**
 			 * no separator before the first child
-			**/
-			buf = jsonz_string_concat(result, ", ", NULL);
+			 */
+			buf = jsonz_string_concat(result, ",", NULL);
 			free(result);
 			result = buf;
 		}
@@ -82,7 +82,7 @@ char *jsonz_object_build(void *obj)
 			appendee = malloc(48);
 			memset(appendee, 0, 48);
 			double val = jsonz_object_number_get_num_value(child);
-			sprintf(appendee, "%24.16lf", val);
+			sprintf(appendee, "%.15lf", val);
 		}
 		else if (type == jsonz_type_string)
 		{
@@ -106,7 +106,7 @@ char *jsonz_object_build(void *obj)
 		}
 		else if (root_type == jsonz_type_object)
 		{
-			buf = jsonz_string_concat(result, "\"", key, "\"", ": ", appendee, NULL);
+			buf = jsonz_string_concat(result, "\"", key, "\"", ":", appendee, NULL);
 			free(result);
 			result = buf;
 		}
@@ -231,23 +231,23 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			{
 				/**
 				 * do not parse scalars
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
 			/**
 			 * found a string: walk past it
-			**/
+			 */
 			position = c - json + 1;
 			/**
 			 * avoid segfault by checking for *c being terminating NULL
-			**/
+			 */
 			while (*++c != '"' && *c && (c - json) < l)
 			{
 				/**
 				 * if it's an escape char, just walk past it,
 				 * * as it potentially can be an escaped "
-				**/
+				 */
 				if (*c == '\\')
 				{
 					c++;
@@ -258,7 +258,7 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 				/**
 				 * End of string but string isn't closed
 				 * fprintf(stderr, "libjsonz error: mismatched string\n");
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
@@ -266,7 +266,7 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			{
 				/**
 				 * fprintf(stderr, "libjsonz error: unexpected end of string\n"); 
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
@@ -276,7 +276,7 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 		case '{':
 			/**
 			 * if it's the root element, don't return it
-			**/
+			 */
 			if (!had_outmost_structured)
 			{
 				had_outmost_structured = 1;
@@ -285,12 +285,12 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			}
 			/**
 			 * else, found an inner object, walk past it
-			**/
+			 */
 			object_depth++;
 			position = c - json;
 			/**
 			 * avoid segfault by checking for *c being terminating NULL
-			**/
+			 */
 			while (object_depth && *c && (c - json < l))
 			{
 				c++;
@@ -308,7 +308,7 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 				/**
 				 * End of string but object isn't closed
 				 * fprintf(stderr, "libjsonz error: mismatched object\n");
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
@@ -316,7 +316,7 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			{
 				/**
 				 * fprintf(stderr, "libjsonz error: unexpected end of string\n");
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
@@ -326,7 +326,7 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 		case '[':
 			/**
 			 * if it's the root element, don't return it
-			**/
+			 */
 			if (!had_outmost_structured)
 			{
 				had_outmost_structured = 1;
@@ -336,12 +336,12 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			}
 			/**
 			 * else, found an inner array, walk past it
-			**/
+			 */
 			array_depth++;
 			position = c - json;
 			/**
 			 * avoid segfault by checking for *c being terminating NULL
-			**/
+			 */
 			while (array_depth && *c && (c - json) < l)
 			{
 				c++;
@@ -359,7 +359,7 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 				/**
 				 * End of string but array isn't closed
 				 * fprintf(stderr, "libjsonz error: mismatched array\n");
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
@@ -367,7 +367,7 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			{
 				/**
 				 * fprintf(stderr, "libjsonz error: unexpected end of string\n");
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
@@ -390,13 +390,13 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			{
 				/**
 				 * do not parse scalars
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
 			/**
 			 * found a number: go until we encounter a non-number character
-			**/
+			 */
 			position = c - json;
 			while (strchr("0123456789.eE+-", *c) && (c - json) < l)
 			{
@@ -406,7 +406,7 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			{
 				/**
 				 * fprintf(stderr, "libjsonz error: unexpected end of string\n");
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
@@ -418,16 +418,16 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			{
 				/**
 				 * meaningless out of an object
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
 			/**
 			 * if the root element is not an object, there should be no colons
-			**/
+			 */
 			if (jsonz_result_get_root_type(result) != jsonz_type_object)
 			{
-				/*
+				/**
 				 * fprintf(stderr, "libjsonz error: found key separator in array\n");
 				 */
 				jsonz_result_free(result);
@@ -439,14 +439,14 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			{
 				/**
 				 * meaningless out of an array or object
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
 			/**
 			 * there can be a comma in any structured data type,
 			 * and we don't want error checking, so just ignore it
-			**/
+			 */
 			break;
 		case ' ':
 		case '\n':
@@ -454,20 +454,20 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 		case '\t':
 			/**
 			 * skip any whitespace
-			**/
+			 */
 			break;
 		case 't':
 			if (!had_outmost_structured)
 			{
 				/**
 				 * do not parse scalars
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
 			/**
 			 * should be true
-			**/
+			 */
 			if (strncmp(c, "true", 4) == 0)
 			{
 				jsonz_result_add(result, c - json, 4, jsonz_type_bool);
@@ -477,14 +477,14 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			/**
 			 * else: error
 			 * fprintf(stderr, "libjsonz error: true expected\n");
-			**/
+			 */
 			jsonz_result_free(result);
 			return NULL;
 			break;
 		case 'f':
 			if (!had_outmost_structured)
 			{
-				/*
+				/**
 				 * do not parse scalars
 				 */
 				jsonz_result_free(result);
@@ -492,7 +492,7 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			}
 			/**
 			 * should be false
-			**/
+			 */
 			if (strncmp(c, "false", 5) == 0)
 			{
 				jsonz_result_add(result, c - json, 5, jsonz_type_bool);
@@ -502,7 +502,7 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			/**
 			 * else: error
 			 * fprintf(stderr, "libjsonz error: false expected\n");
-			**/
+			 */
 			jsonz_result_free(result);
 			return NULL;
 			break;
@@ -511,13 +511,13 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			{
 				/**
 				 * do not parse scalars
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
 			/**
 			 * should be null
-			**/
+			 */
 			if (strncmp(c, "null", 4) == 0)
 			{
 				jsonz_result_add(result, c - json, 4, jsonz_type_null);
@@ -527,20 +527,20 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			/**
 			 * else: error
 			 * fprintf(stderr, "libjsonz error: null expected\n");
-			**/
+			 */
 			jsonz_result_free(result);
 			return NULL;
 			break;
 		case ']':
 			/**
 			 * handle termination of root element
-			**/
+			 */
 			if (jsonz_result_get_root_type(result) != jsonz_type_array)
 			{
 				/**
 				 * error
 				 * fprintf(stderr, "libjsonz error: improper termination of root array\n");
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
@@ -548,13 +548,13 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 		case '}':
 			/**
 			 * handle termination of root element
-			**/
+			 */
 			if (jsonz_result_get_root_type(result) != jsonz_type_object)
 			{
 				/**
 				 * error
 				 * fprintf(stderr, "libjsonz error: improper termination of root object\n");
-				**/
+				 */
 				jsonz_result_free(result);
 				return NULL;
 			}
@@ -563,7 +563,7 @@ jsonz_result_t *jsonz_parse(const char *json, int len)
 			/**
 			 * there shouldn't be any other case
 			 * fprintf(stderr, "libjsonz error: unexpected character: %c\n", *c);
-			**/
+			 */
 			jsonz_result_free(result);
 			return NULL;
 

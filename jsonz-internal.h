@@ -4,15 +4,21 @@
  *
  * Created by Árpád Goretity on 28/11/2011.
  * Licensed under a CreativeCommons Attribution 3.0 Unported License
-**/
+ */
 
 #ifndef __JSONZ_JSONZ_INTERNAL_H__
 #define __JSONZ_JSONZ_INTERNAL_H__
 
+#ifdef __GNUC__
 #define sentinel __attribute__((sentinel))
+#else
+#define sentinel
+#endif
 
+#include <string.h>
 #include <jsonz/jsonz.h>
 
+char *strdup(const char *str);
 
 jsonz_result_t *jsonz_result_new();
 jsonz_result_t *jsonz_result_set_root_type(jsonz_result_t *result, jsonz_type_t type);

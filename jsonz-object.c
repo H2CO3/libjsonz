@@ -4,7 +4,7 @@
  *
  * Created by Árpád Goretity on 29/12/2011.
  * Licensed under a CreativeCommons Attribution 3.0 Unported License
-**/
+ */
 
 #include <string.h>
 #include <jsonz/jsonz-object.h>
@@ -12,7 +12,7 @@
 
 /**
  * Memory management functions
-**/
+ */
 
 void *jsonz_object_new(jsonz_type_t type)
 {
@@ -77,7 +77,7 @@ void jsonz_object_release(void *obj)
 
 /**
  * Querying object types
-**/
+ */
 
 jsonz_type_t jsonz_object_get_type(void *obj)
 {
@@ -90,7 +90,7 @@ jsonz_type_t jsonz_object_get_type(void *obj)
 
 /**
  * Number and boolean functions
-**/
+ */
 
 int jsonz_object_number_is_bool(jsonz_object_number_t *num)
 {
@@ -155,7 +155,7 @@ void jsonz_object_number_set_num_value(jsonz_object_number_t *num, double value)
 
 /**
  * String functions
-**/
+ */
 
 const char *jsonz_object_string_get_str(jsonz_object_string_t *string)
 {
@@ -194,7 +194,7 @@ void jsonz_object_string_set_str(jsonz_object_string_t *string, const char *str_
 
 /**
  * Array functions
-**/
+ */
 
 int jsonz_object_array_length(jsonz_object_array_t *arr)
 {
@@ -247,7 +247,7 @@ void jsonz_object_array_add_element(jsonz_object_array_t *arr, void *element, in
 	}
 	/**
 	 * make room for the new element
-	**/
+	 */
 	arr->length++;
 	void **c = realloc(arr->children, arr->length * sizeof(*c));
 	if (!c)
@@ -261,12 +261,12 @@ void jsonz_object_array_add_element(jsonz_object_array_t *arr, void *element, in
 	{
 		/**
 		 * append to end
-		**/
+		 */
 		idx = arr->length - 1;
 	}
 	/**
 	 * shift the elements with their index >= idx to the right
-	**/
+	 */
 	int i;
 	for (i = arr->length - 1; i > idx; i--)
 	{
@@ -290,7 +290,7 @@ void jsonz_object_array_delete_element(jsonz_object_array_t *arr, void *element)
 	{
 		/**
 		 * delete every occurrence of the object
-		**/
+		 */
 		while (arr->children[index] == element)
 		{
 			jsonz_object_array_delete_nth_element(arr, index);
@@ -316,12 +316,12 @@ void jsonz_object_array_delete_nth_element(jsonz_object_array_t *arr, int index)
 
 	/**
 	 * release the deletee
-	**/
+	 */
 	jsonz_object_release(arr->children[index]);
 
 	/**
 	 * shift the elements with their index >= index to the left
-	**/
+	 */
 	int i;
 	for (i = index; i < arr->length - 1; i++)
 	{
@@ -329,7 +329,7 @@ void jsonz_object_array_delete_nth_element(jsonz_object_array_t *arr, int index)
 	}
 	/**
 	 * then shrink the array
-	**/
+	 */
 	arr->length--;
 	void **c = realloc(arr->children, arr->length * sizeof(*c));
 	if (!c)
@@ -341,7 +341,7 @@ void jsonz_object_array_delete_nth_element(jsonz_object_array_t *arr, int index)
 
 /**
  * Object functions (a. k. a. Associative Arrays)
-**/
+ */
 
 int jsonz_object_object_length(jsonz_object_object_t *obj)
 {
@@ -414,7 +414,7 @@ void jsonz_object_object_set_element(jsonz_object_object_t *obj, const char *key
 	/**
 	 * if the object already contains this key, we release
 	 * the old object, and retain the new one
-	**/
+	 */
 	int i;
 	for (i = 0; i < obj->length; i++)
 	{
@@ -427,7 +427,7 @@ void jsonz_object_object_set_element(jsonz_object_object_t *obj, const char *key
 	}
 	/**
 	 * if the key is not yet present, add it
-	**/
+	 */
 	obj->length++;
 	char **k = realloc(obj->keys, obj->length * sizeof(*k));
 	void **c = realloc(obj->children, obj->length * sizeof(*c));
@@ -460,7 +460,7 @@ void jsonz_object_object_delete_element(jsonz_object_object_t *obj, const char *
 	}
 	/**
 	 * we only go until the first occurrence, as each key is unique in an object
-	**/
+	 */
 	int i;
 	for (i = 0; i < obj->length; i++)
 	{
@@ -468,15 +468,15 @@ void jsonz_object_object_delete_element(jsonz_object_object_t *obj, const char *
 		{
 			/**
 			 * remove the key
-			**/
+			 */
 			free(obj->keys[i]);
 			/**
 			 * and the corresponding object
-			**/
+			 */
 			jsonz_object_release(obj->children[i]);
 			/**
 			 * and shift the remaining elements one to the left
-			**/
+			 */
 			int j;
 			for (j = i; j < obj->length - 1; j++)
 			{
@@ -485,7 +485,7 @@ void jsonz_object_object_delete_element(jsonz_object_object_t *obj, const char *
 			}
 			/**
 			 * and shrink the object
-			**/
+			 */
 			obj->length--;
 			char **k = realloc(obj->keys, obj->length * sizeof(*k));
 			void **c = realloc(obj->children, obj->length * sizeof(*c));

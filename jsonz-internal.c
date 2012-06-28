@@ -4,7 +4,7 @@
  *
  * Created by Árpád Goretity on 28/11/2011.
  * Licensed under a CreativeCommons Attribution 3.0 Unported License
-**/
+ */
 
 #include <jsonz/jsonz-internal.h>
 #include <jsonz/jsonz-object.h>
@@ -13,7 +13,7 @@
 
 /**
  * Result API internal helpers
-**/
+ */
 
 jsonz_result_t *jsonz_result_new()
 {
@@ -58,7 +58,7 @@ jsonz_result_t *jsonz_result_add(jsonz_result_t *result, int position, int lengt
 
 /**
  * Object API internal helpers
-**/
+ */
 
 void jsonz_object_free(void *obj)
 {
@@ -83,7 +83,7 @@ void jsonz_object_free(void *obj)
 	{
 		/**
 		 * recursion
-		**/
+		 */
 		int count = ((jsonz_object_array_t *)obj)->length;
 		void **children = ((jsonz_object_array_t *)obj)->children;
 		int i;
@@ -98,7 +98,7 @@ void jsonz_object_free(void *obj)
 	{
 		/**
 		 * recursion
-		**/
+		 */
 		int count = ((jsonz_object_object_t *)obj)->length;
 		void **children = ((jsonz_object_object_t *)obj)->children;
 		char **keys = ((jsonz_object_object_t *)obj)->keys;
@@ -131,7 +131,7 @@ void *jsonz_object_recursive_parse(const char *json, int length)
 	{
 		/**
 		 * this shouldn't be any other type 
-		**/
+		 */
 		jsonz_result_free(buf);
 		return NULL;
 	}
@@ -250,7 +250,7 @@ void *jsonz_object_recursive_parse(const char *json, int length)
 
 /**
  * Miscellaneous helper functions
-**/
+ */
 
 sentinel char *jsonz_string_concat(const char *str, ...)
 {
@@ -269,7 +269,7 @@ sentinel char *jsonz_string_concat(const char *str, ...)
 		{
 			/**
 			 * found sentinel
-			**/
+			 */
 			break;
 		}
 		int len_addend = strlen(addend);
@@ -286,6 +286,21 @@ sentinel char *jsonz_string_concat(const char *str, ...)
 	}
 	va_end(args);
 	return base;
+}
+
+/* This is for C89-compilance */
+char *strdup(const char *str)
+{
+	if (str == NULL)
+		return NULL;
+
+	size_t len = strlen(str) + 1;
+	char *buf = malloc(len);
+	if (buf == NULL)
+		return NULL;
+
+	strcpy(buf, str);
+	return buf;
 }
 
 char *jsonz_strndup(const char *str, size_t num)

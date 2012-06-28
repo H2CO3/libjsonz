@@ -1,10 +1,10 @@
-/*
-  jsonz/jsonz-types.h
-  libjsonz
-  
-  Created by Árpád Goretity on 29/12/2011.
-  Licensed under a CreativeCommons Attribution 3.0 Unported License
-*/
+/**
+ * jsonz/jsonz-types.h
+ * libjsonz
+ * 
+ * Created by Árpád Goretity on 29/12/2011.
+ * Licensed under a CreativeCommons Attribution 3.0 Unported License
+ */
 
 
 #ifndef __JSONZ_JSONZ_TYPES_H__

@@ -4,7 +4,7 @@
  *
  * Created by Árpád Goretity on 29/12/2011.
  * Licensed under a CreativeCommons Attribution 3.0 Unported License
-**/
+ */
 
 
 #ifndef __JSONZ_JSONZ_OBJECT_H__
