@@ -1,0 +1,30 @@
+TARGET = libjsonz.dylib
+OBJECTS = jsonz.o jsonz-internal.o jsonz-object.o
+HEADERS = jsonz
+
+CC = gcc
+LD = $(CC)
+
+CFLAGS = -I/opt/local/include -Wall -I. -c
+
+LDFLAGS =  -w -dynamiclib -install_name /usr/lib/$(TARGET)
+
+
+all: $(TARGET)
+
+$(TARGET): $(OBJECTS)
+	$(LD) $(LDFLAGS) -o $@ $^
+
+install: $(TARGET)
+	cp $^ /usr/lib
+	cp -r $(HEADERS) /usr/include
+
+clean:
+	rm -f $(OBJECTS) $(TARGET)
+
+uninstall:
+	rm /usr/lib/$(TARGET)
+	rm /usr/include/$(HEADERS)/*
+
+%.o: %.c
+	$(CC) $(CFLAGS) $^
