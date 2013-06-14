@@ -10,5 +10,18 @@
 #include <stdlib.h>
 #include <jsonz/object.h>
 
+#ifndef JSONZ_JSONZ_H
+#define JSONZ_JSONZ_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
 void *jsonz_parse(const char *str);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif /* JSONZ_JSONZ_H */
 

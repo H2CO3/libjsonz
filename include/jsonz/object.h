@@ -22,6 +22,9 @@
 #define JSONZ_TYPE_ARRAY	5
 #define JSONZ_TYPE_DICT		6
 
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 void *jsonz_object_new(int type);
 void *jsonz_object_retain(void *obj);
@@ -47,6 +50,10 @@ size_t jsonz_dict_size(void *obj);
 const char *jsonz_dict_key(void *obj, unsigned index);
 void *jsonz_dict_get(void *obj, const char *key);
 void jsonz_dict_set(void *obj, const char *key, void *elem);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* JSONZ_OBJECT_H */
 
