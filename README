@@ -3,57 +3,68 @@ Overview
 libjsonz is a lightweight JSON-parsing library written in C. It is not strict,
 so, as a result, you have to pass it valid JSON data, or unspecified behaviour may occur.
 
-Synopsys:
-------------
-
-#include <jsonz.h>
-
-enum jsonz_type_t:
-	jsonz_type_null:	a null value.
-	jsonz_type_number:	an integer or floating-point number.
-	jsonz_type_bool:	true or false.
-	jsonz_type_string:	string.
-	jsonz_type_array:	array of any JSON value.
-	jsonz_type_object:	object as strings with keys and any JSON type as values.
-
-The jsonz_result API:
+The API:
 *********************
-	This API contains quicker, lighter functions for memory-efficient and quick parsing of large chunks of JSON.
+	This is a reference counted, object-oriented API for conveniently
+	(and automatically, recursively) parsing JSON.
 
-struct jsonz_result_t:
-	A private datatype. Result of parsing a valid JSON string. Must be accessed only through
-	the jsonz_* function API.
+#include <jsonz/jsonz.h>
 
-jsonz_result_t *jsonz_parse(char *json, int len);
-	Parses a valid JSON string and returns the result as a jsons_result_t object.
-	This object must be freed after use using jsonz_result_free.
-	Internally, this structure is an array of positions, lengths and types, each
-	corresponding to a node in the top-level dictionary or array of the JSON string.
-	These offset and type values can be used to retrieve the original values of the
-	unstructured JSON string, and if a type is either of "array" or "object", it
-	can be recursively parsed using subsequent calls to this function.
-	len is the maximum length of the JSON string to be used. Pass -1 to use strlen(json).
-	This parameter is useful for the recursive parsing mentioned above.
+Types:
+	JSONZ_TYPE_NULL:	a null value.
+	JSONZ_TYPE_BOOL:	true or false.
+	JSONZ_TYPE_INT:		an integral number.
+	JSONZ_TYPE_FLOAT:	a floating-point ("real") number.
+	JSONZ_TYPE_STRING:	string.
+	JSONZ_TYPE_ARRAY:	array of any JSON value.
+	JSONZ_TYPE_DICT:	dictionary (key-value map, associative array, ...)
 
-void jsonz_result_free(jsonz_result_t *result);
-	Should be called on every return value of jsonz_parse() when it's not anymore needed.
 
-jsonz_type_t jsonz_result_get_root_type(jsonz_result_t *result);
-	Returns either jsonz_type_array or jsonz_type_object according to the type of the
-	root node of the parsed JSON string.
+Functions:
+
+	void *jsonz_parse(const char *str);
+		parses a JSON string, and returns its top-level object.
 	
-int jsonz_result_get_position(jsonz_result_t *result, int idx);
-int jsonz_result_get_length(jsonz_result_t *result, int idx);
-jsonz_type_t jsonz_result_get_type(jsonz_result_t *result, int idx);
-	You can access the offset, length or data type of each parsed (top-level)
-	JSON node, respectively. Valid range of index is of course 0...jsonz_result_get_count().
+	void *jsonz_object_new(int type);
+	void *jsonz_object_retain(void *obj);
+	void jsonz_object_release(void *obj);
+		These functions manage the reference counting. Typically, a
+		user needs to call `jsonz_object_relese()` directly.
+		
+	int jsonz_object_get_type(void *obj);
+		This function returns the type of a JSONZ object.
 
-int jsonz_result_get_count(jsonz_result_t *result);
-	Returns the number of items parsed from the JSON string.
+	int jsonz_number_get_bool_value(void *obj);
+	long long jsonz_number_get_int_value(void *obj);
+	double jsonz_number_get_float_value(void *obj);
+	void jsonz_number_set_bool_value(void *obj, int b);
+	void jsonz_number_set_int_value(void *obj, long long i);
+	void jsonz_number_set_float_value(void *obj, double d);
+		These functions operate on numbers (booleans, integers, floating-point
+		numbers). Each function should only be called on a number object
+		of the appropriate type (which should be obtained first by a
+		call to jsonz_object_get_type()).
+	
+	const char *jsonz_string_get_str(void *obj);
+	void jsonz_string_set_str(void *obj, const char *str_new);
+	void jsonz_string_set_str_nocopy(void *obj, char *str_new);
+		These functions get and set the C string owned by a JSONZ string
+		object. the 'nocopy' version of the setter does not copy the
+		C string; as a consequence, it performs an ownership transfer
+		(i. e. the C string should be dynamically allocated).
+	
+	size_t jsonz_array_size(void *obj);
+	void *jsonz_array_get(void *obj, unsigned idx);
+	void jsonz_array_add(void *obj, void *elem);
+		Accessors for arrays. `jsonz_array_add()` appends `elem` to the
+		end of the array. `jsonz_array_get()` invokes undefined behavior
+		if the index is out of bounds.
+	
+	size_t jsonz_dict_size(void *obj);
+	const char *jsonz_dict_key(void *obj, unsigned index);
+	void *jsonz_dict_get(void *obj, const char *key);
+	void jsonz_dict_set(void *obj, const char *key, void *elem);
+		Accessors for dictionaries. `jsonz_dict_set()` copies the key.
+		`jsonz_dict_set()` returns NULL when the value for the specified
+		key is not found in the dictionary.
 
-The jsonz_object API:
-*********************
-	This is an object-oriented API in order to conveniently (and automatically, recursively) parse relatively small amounts of JSON.
-	Please see the jsonz-object.h header file to see the functions. The functions have self-explanatory names; the object and the string returned by jsonz_object_parse and jsonz_object_build, must be jsonz_object_release()'d and free()'d.
-	The jsonz_object_array_add_element function accepts negative array indexes. This means it will append any object to the end of the array.
-	jsonz_object_array_add_element and jsonz_object_object_set_element jsonz_object_retain() the child object to be added, so it must be jsonz_object_release()'d. jsonz_object_object_set_element also copies its "key" parameter so it must be free()'d as well.
