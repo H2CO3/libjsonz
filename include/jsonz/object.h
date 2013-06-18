@@ -27,8 +27,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 void *jsonz_object_new(int type);
-void *jsonz_object_retain(void *obj);
-void jsonz_object_release(void *obj);
+void jsonz_object_free(void *obj);
 int jsonz_object_get_type(void *obj);
 
 int jsonz_number_get_bool_value(void *obj);
@@ -49,7 +48,8 @@ void jsonz_array_add(void *obj, void *elem);
 size_t jsonz_dict_size(void *obj);
 const char *jsonz_dict_key(void *obj, unsigned index);
 void *jsonz_dict_get(void *obj, const char *key);
-void jsonz_dict_set(void *obj, const char *key, void *elem);
+/* returns previous element for the key or NULL if not yet present */
+void *jsonz_dict_set(void *obj, const char *key, void *elem);
 
 #ifdef __cplusplus
 }

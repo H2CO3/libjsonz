@@ -19,21 +19,6 @@ static inline void skip_space(jsonz_parser_t *p)
 		p->str++;
 }
 
-static jsonz_parser_t *new_parser(const char *str)
-{
-	jsonz_parser_t *p = malloc(sizeof(*p));
-	if (p == NULL)
-		return NULL;
-	
-	p->str = str;
-	return p;
-}
-
-static inline void free_parser(jsonz_parser_t *p)
-{
-	free(p);
-}
-
 static int unescape_char(jsonz_parser_t *p)
 {
 	/* skip leading backslash '\' */
@@ -241,20 +226,19 @@ static void *parse_arr(jsonz_parser_t *p)
 		void *elem = parse(p);
 		
 		if (elem == NULL) {
-			jsonz_object_release(obj);
+			jsonz_object_free(obj);
 			return NULL;
 		}
 
 		skip_space(p);
 		if (*p->str != ',' && *p->str != ']') {
 			fprintf(stderr, "libjsonz: expected ']' or ',' in array\n");
-			jsonz_object_release(elem);
-			jsonz_object_release(obj);
+			jsonz_object_free(elem);
+			jsonz_object_free(obj);
 			return NULL;
 		}
 		
 		jsonz_array_add(obj, elem);
-		jsonz_object_release(elem);
 
 		/* skip ',' */
 		if (*p->str == ',')
@@ -283,22 +267,22 @@ static void *parse_dic(jsonz_parser_t *p)
 		void *key = parse(p);
 		
 		if (key == NULL) {
-			jsonz_object_release(obj);
+			jsonz_object_free(obj);
 			return NULL;
 		}
 		
 		if (jsonz_object_get_type(key) != JSONZ_TYPE_STRING) {
 			fprintf(stderr, "libjsonz: dictionary key must be a string\n");
-			jsonz_object_release(key);
-			jsonz_object_release(obj);
+			jsonz_object_free(key);
+			jsonz_object_free(obj);
 			return NULL;
 		}
 		
 		skip_space(p);
 		if (*p->str != ':') {
 			fprintf(stderr, "libjsonz: expected ':' after dictionary key\n");
-			jsonz_object_release(key);
-			jsonz_object_release(obj);
+			jsonz_object_free(key);
+			jsonz_object_free(obj);
 			return NULL;	
 		}
 
@@ -309,24 +293,22 @@ static void *parse_dic(jsonz_parser_t *p)
 		void *elem = parse(p);
 		if (elem == NULL) {
 			fprintf(stderr, "libjsonz: expected value after key in dictionary\n");
-			jsonz_object_release(key);
-			jsonz_object_release(elem);
-			jsonz_object_release(obj);
+			jsonz_object_free(key);
+			jsonz_object_free(elem);
+			jsonz_object_free(obj);
 			return NULL;	
 		}
 		
 		skip_space(p);
 		if (*p->str != ',' && *p->str != '}') {
 			fprintf(stderr, "libjsonz: expected '}' or ',' in dictionary\n");
-			jsonz_object_release(key);
-			jsonz_object_release(elem);
-			jsonz_object_release(obj);
+			jsonz_object_free(key);
+			jsonz_object_free(elem);
+			jsonz_object_free(obj);
 			return NULL;
 		}
 		
 		jsonz_dict_set(obj, jsonz_string_get_str(key), elem);
-		jsonz_object_release(key);
-		jsonz_object_release(elem);
 		
 		skip_space(p);
 		
@@ -342,9 +324,8 @@ static void *parse_dic(jsonz_parser_t *p)
 
 void *jsonz_parse(const char *str)
 {
-	jsonz_parser_t *p = new_parser(str);
-	void *obj = parse(p);
-	free_parser(p);
+	jsonz_parser_t p = { str };
+	void *obj = parse(&p);
 	return obj;
 }
 

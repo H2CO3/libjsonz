@@ -5,7 +5,7 @@ so, as a result, you have to pass it valid JSON data, or unspecified behaviour m
 
 The API:
 *********************
-	This is a reference counted, object-oriented API for conveniently
+	This is an object-oriented API for conveniently
 	(and automatically, recursively) parsing JSON.
 
 #include <jsonz/jsonz.h>
@@ -26,10 +26,9 @@ Functions:
 		parses a JSON string, and returns its top-level object.
 	
 	void *jsonz_object_new(int type);
-	void *jsonz_object_retain(void *obj);
-	void jsonz_object_release(void *obj);
+	void jsonz_object_free(void *obj);
 		These functions manage the reference counting. Typically, a
-		user needs to call `jsonz_object_relese()` directly.
+		user needs to call `jsonz_object_free()` directly.
 		
 	int jsonz_object_get_type(void *obj);
 		This function returns the type of a JSONZ object.
@@ -63,8 +62,10 @@ Functions:
 	size_t jsonz_dict_size(void *obj);
 	const char *jsonz_dict_key(void *obj, unsigned index);
 	void *jsonz_dict_get(void *obj, const char *key);
-	void jsonz_dict_set(void *obj, const char *key, void *elem);
+	void *jsonz_dict_set(void *obj, const char *key, void *elem);
 		Accessors for dictionaries. `jsonz_dict_set()` copies the key.
-		`jsonz_dict_set()` returns NULL when the value for the specified
-		key is not found in the dictionary.
+		`jsonz_dict_get()` returns NULL when the value for the specified
+		key is not found in the dictionary. `jsonz_dict_set()` returns
+		the value previously associated with the key or NULL if the
+		key wasn't yet in the dictionary.
 

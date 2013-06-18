@@ -12,7 +12,6 @@
 
 typedef struct jsonz_object_t {
 	int type;
-	int refcount;
 } jsonz_object_t;
 
 typedef struct jsonz_null_t {
@@ -34,74 +33,98 @@ typedef struct jsonz_string_t {
 
 typedef struct jsonz_array_t {
 	jsonz_object_t base;
-	void **vals;
 	size_t size;
+	void **vals;
 } jsonz_array_t;
 
 typedef struct jsonz_dict_t {
 	jsonz_object_t base;
+	size_t size;
 	char **keys;
 	void **vals;
-	size_t size;
 } jsonz_dict_t;
 
+static void *chkmalloc(size_t sz)
+{
+	void *p = malloc(sz);
+	if (!p)
+		abort();
+	
+	return p;
+}
 
 void *jsonz_object_new(int type)
 {
-	size_t size;
+	jsonz_object_t *obj;
+	jsonz_number_t *num;
+	jsonz_string_t *str;
+	jsonz_array_t *arr;
+	jsonz_dict_t *dic;
+	void *o;
+	
 	switch (type) {
 	case JSONZ_TYPE_NULL:
-		size = sizeof(jsonz_null_t);
+		o = chkmalloc(sizeof(jsonz_null_t));
 		break;
 	case JSONZ_TYPE_BOOL:
 	case JSONZ_TYPE_INT:
+		o = chkmalloc(sizeof(jsonz_number_t));
+		num = o;
+		num->val.intval = 0;
+		break;
 	case JSONZ_TYPE_FLOAT:
-		size = sizeof(jsonz_number_t);
+		o = chkmalloc(sizeof(jsonz_number_t));
+		num = o;
+		num->val.fltval = 0.0;
 		break;
 	case JSONZ_TYPE_STRING:
-		size = sizeof(jsonz_string_t);
+		o = chkmalloc(sizeof(jsonz_string_t));
+		str = o;
+		str->str = NULL;
 		break;
 	case JSONZ_TYPE_ARRAY:
-		size = sizeof(jsonz_array_t);
+		o = chkmalloc(sizeof(jsonz_array_t));
+		arr = o;
+		arr->size = 0;
+		arr->vals = NULL;
 		break;
 	case JSONZ_TYPE_DICT:
-		size = sizeof(jsonz_dict_t);
+		o = chkmalloc(sizeof(jsonz_dict_t));
+		dic = o;
+		dic->size = 0;
+		dic->keys = NULL;
+		dic->vals = NULL;
 		break;
 	default:
 		return NULL;
 	}
 	
-	jsonz_object_t *obj = malloc(size);
-	if (obj == NULL)
-		return NULL;
-
-	memset(obj, 0, size);
+	obj = o;
 	obj->type = type;
-	obj->refcount = 1;
-	
 	return obj;
 }
 
-static void jsonz_object_free(void *obj)
+void jsonz_object_free(void *obj)
 {
 	jsonz_string_t *str = obj;
 	jsonz_array_t *arr = obj;
 	jsonz_dict_t *dic = obj;
 	jsonz_object_t *o = obj;
 	unsigned i;
+	
 	switch (o->type) {
 	case JSONZ_TYPE_STRING:
 		free(str->str);
 		break;
 	case JSONZ_TYPE_ARRAY:
 		for (i = 0; i < arr->size; i++) {
-			jsonz_object_release(arr->vals[i]);
+			jsonz_object_free(arr->vals[i]);
 		}
 		break;
 	case JSONZ_TYPE_DICT:
 		for (i = 0; i < dic->size; i++) {
 			free(dic->keys[i]);
-			jsonz_object_release(dic->vals[i]);
+			jsonz_object_free(dic->vals[i]);
 		}
 		break;
 	case JSONZ_TYPE_NULL:
@@ -113,27 +136,6 @@ static void jsonz_object_free(void *obj)
 	}
 	
 	free(obj);
-}
-
-void *jsonz_object_retain(void *obj)
-{
-	if (obj == NULL)
-		return NULL;
-
-	jsonz_object_t *o = obj;
-	o->refcount++;
-	return obj;
-}
-
-void jsonz_object_release(void *obj)
-{
-	if (obj == NULL)
-		return;
-
-	jsonz_object_t *o = obj;
-	o->refcount--;
-	if (o->refcount == 0)
-		jsonz_object_free(obj);
 }
 
 /*
@@ -238,7 +240,7 @@ void jsonz_array_add(void *obj, void *elem)
 		abort();
 
 	arr->vals = v;
-	arr->vals[arr->size++] = jsonz_object_retain(elem);
+	arr->vals[arr->size++] = elem;
 }
 
 
@@ -271,19 +273,19 @@ void *jsonz_dict_get(void *obj, const char *key)
 	return NULL;
 }
 
-void jsonz_dict_set(void *obj, const char *key, void *elem)
+void *jsonz_dict_set(void *obj, const char *key, void *elem)
 {
 	/*
-	 * if the object already contains this key, we release
-	 * the old object, and retain the new one
+	 * if the object already contains this key, we just
+	 * exchange it with the new one
 	 */
 	jsonz_dict_t *dic = obj;
 	unsigned i;
 	for (i = 0; i < dic->size; i++) {
 		if (strcmp(dic->keys[i], key) == 0) {
-			jsonz_object_release(dic->vals[i]);
-			dic->vals[i] = jsonz_object_retain(elem);
-			return;
+			void *prv = dic->vals[i];
+			dic->vals[i] = elem;
+			return prv;
 		}
 	}
 	
@@ -303,6 +305,7 @@ void jsonz_dict_set(void *obj, const char *key, void *elem)
 		abort();
 	
 	dic->keys[dic->size - 1] = key_new;
-	dic->vals[dic->size - 1] = jsonz_object_retain(elem);
+	dic->vals[dic->size - 1] = elem;
+	return NULL;
 }
 

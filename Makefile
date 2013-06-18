@@ -7,7 +7,7 @@ SRCDIR = src
 OBJDIR = bld
 ARFLAGS = -cvrs
 
-CFLAGS = -isysroot $(SYSROOT) -std=c99 -O0 -g -Wall -pedantic -pedantic-errors -c -Iinclude
+CFLAGS = -isysroot $(SYSROOT) -std=c99 -Os -Wall -pedantic -pedantic-errors -c -Iinclude
 LDFLAGS = -isysroot $(SYSROOT) -w
 
 OBJECTS = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(wildcard $(SRCDIR)/*.c))
