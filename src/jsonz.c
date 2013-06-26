@@ -19,7 +19,7 @@ static inline void skip_space(jsonz_parser_t *p)
 		p->str++;
 }
 
-static int unescape_char(jsonz_parser_t *p)
+static long unescape_char(jsonz_parser_t *p)
 {
 	/* skip leading backslash '\' */
 	switch (*++p->str) {
@@ -44,7 +44,7 @@ static int unescape_char(jsonz_parser_t *p)
 			memcpy(buf, p->str, 4);
 			buf[4] = 0;
 			p->str += 4;
-			return strtol(buf, NULL, 16);
+			return strtol(buf, NULL, 16); /* can't overflow */
 		}
 
 		/* invalid hex escape sequence */
@@ -133,7 +133,7 @@ static void *parse_str(jsonz_parser_t *p)
 		}
 		
 		if (p->str[0] == '\\') {
-			int c = unescape_char(p);
+			long c = unescape_char(p);
 			if (c < 0) {
 				/* error unescaping the character */
 				free(buf);
