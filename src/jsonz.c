@@ -44,7 +44,7 @@ static int unescape_char(jsonz_parser_t *p)
 			memcpy(buf, p->str, 4);
 			buf[4] = 0;
 			p->str += 4;
-			return (int)strtol(buf, NULL, 16);
+			return (unsigned)strtol(buf, NULL, 16);
 		}
 
 		/* invalid hex escape sequence */
