@@ -1,0 +1,28 @@
+CC = gcc
+LD = $(CC)
+AR = ar
+
+SYSROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk
+SRCDIR = src
+OBJDIR = bld
+ARFLAGS = -cvrs
+
+CFLAGS = -std=c99 -Os -c -Iinclude
+LDFLAGS = -w
+
+OBJECTS = $(patsubst $(SRCDIR)/%.c, $(OBJDIR)/%.o, $(wildcard $(SRCDIR)/*.c))
+
+all: bld/libjsonz.a
+
+bld/libjsonz.a: $(OBJECTS)
+        $(AR) $(ARFLAGS) $@ $^
+
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
+        $(CC) $(CFLAGS) -o $@ $<
+
+install:all
+        sudo cp $(OBJDIR)/*.a /usr/lib
+        sudo cp -r include /usr/include
+
+clean:
+        rm -f $(OBJECTS) bld/libjsonz.a
