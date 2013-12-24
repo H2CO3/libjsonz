@@ -2,7 +2,6 @@ CC = gcc
 LD = $(CC)
 AR = ar
 
-SYSROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.7.sdk
 SRCDIR = src
 OBJDIR = bld
 ARFLAGS = -cvrs
